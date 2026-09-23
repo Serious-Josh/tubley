@@ -6,6 +6,7 @@ import type { BunRequest } from "bun";
 import { BadRequestError, NotFoundError, UserForbiddenError } from "./errors";
 import path from "node:path";
 import { bundlerModuleNameResolver } from "typescript";
+import { randomBytes } from "node:crypto";
 
 export async function handlerUploadThumbnail(cfg: ApiConfig, req: BunRequest) {
   const { videoId } = req.params as { videoId?: string };
@@ -41,7 +42,7 @@ export async function handlerUploadThumbnail(cfg: ApiConfig, req: BunRequest) {
     throw new UserForbiddenError("Logged in user does not own video");
   }
 
-  const filePath = path.join(cfg.assetsRoot, `${videoId}.${extension}`)
+  const filePath = path.join(cfg.assetsRoot, `${randomBytes(32).toString("base64url")}.${extension}`)
   Bun.write(filePath, imageData);
 
   const fullPath = `http://localhost:${cfg.port}/` + filePath;
